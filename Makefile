@@ -16,42 +16,45 @@ ifeq ($(CXXVER),pre17)
 else
 	cp constants_17.h constants.h
 endif
-	
-	$(CXX) -c constants.cc
-	$(CXX) -c foo.cc
-	$(CXX) -c main.cc
-	$(F90) -c fort.f90
-	$(F90) -c fort_iso.f90
 	mkdir -p lib
-	$(CXX) -shared -fpic constants.cc -o lib/libConstants.$(EXT)
-	$(CXX) -shared -fpic -I${JAVA_HOME}/include -I${JAVA_HOME}/include/$(ARCH) constants_jni.cc -o lib/libConstantsJava.$(EXT)
-	$(CXX) -o main main.o foo.o -Llib -lConstants
-	$(F90) -o fort fort.o -Llib -lConstants
-	$(F90) -o fort_iso fort_iso.o -Llib -lConstants
+	mkdir -p obj
+	mkdir -p bin
+	$(CXX) -c cpp/constants.cc obj/constants.o
+	$(CXX) -c cpp/foo.cc obj/foo.o
+	$(CXX) -c cpp/main.cc obj/main.o
+	$(F90) -c fortran/fort.f90 obj/fort.o
+	$(F90) -c fortran/fort_iso.f90 obj/fort_iso.o
+	$(CXX) -shared -fpic cpp/constants.cc -o lib/libConstants.$(EXT)
+	$(CXX) -shared -fpic -I${JAVA_HOME}/include -I${JAVA_HOME}/include/$(ARCH) cpp/constants_jni.cc -o lib/libConstantsJava.$(EXT)
+	$(CXX) -o bin/main obj/main.o obj/foo.o -Llib -lConstants
+	$(F90) -o bin/fort obj/fort.o -Llib -lConstants
+	$(F90) -o bin/fort_iso obj/fort_iso.o -Llib -lConstants
 	$(JAVA_HOME)/bin/javac -h c -d target java/src/constants/Constants.java
 	$(JAVA_HOME)/bin/javac -d target -cp target java/src/constants/Main.java
-	$(MEX) get_empty_char.cpp
-	$(MEX) get_empty_int.cpp
-	$(MEX) get_empty_double.cpp
+	$(MEX) matlab/get_empty_char.cpp
+	$(MEX) matlab/get_empty_int.cpp
+	$(MEX) matlab/get_empty_double.cpp
 
 test_java:
 	$(JAVA_HOME)/bin/java -Djava.library.path=$(LD_LIBRARY_PATH):./lib -cp target constants.Main
 
 test_cpp:
-	./main
+	./bin/main
 
 test_fortran:
-	./fort
-	./fort_iso
+	./bin/fort
+	./bin/fort_iso
 
 test_matlab:
-	matlab -nodisplay -nosplash -nodesktop -r "run('test.m'); exit;"
+	matlab -nodisplay -nosplash -nodesktop -r "run('matlab/test.m'); exit;"
 
 clean:
 	-rm *.o
-	-rm fort main fort_iso
 	-rm -rf target
 	-rm -rf c
 	-rm -rf lib
+	-rm -rf obj
+	-rm -rf bin
 	-rm -rf constants.h
 	-rm *.mexa64
+

@@ -1,5 +1,5 @@
-CXX=g++-13.2.0
-F90=gfortran-13.2.0
+CXX=g++
+F90=gfortran
 MEX=mex
 CXXVER=17
 ARCH=$(shell uname -s | tr '[:upper:]' '[:lower:]')

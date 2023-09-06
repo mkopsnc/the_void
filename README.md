@@ -24,6 +24,7 @@ make CXX=some_crazy_compiler F90=some_another_crazy_compiler
 ## How to run the code
 
 ```
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:`pwd`/lib
 make test_cpp
 make test_fortran
 make test_java
